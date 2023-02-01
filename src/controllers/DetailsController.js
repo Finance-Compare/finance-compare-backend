@@ -10,9 +10,8 @@ module.exports = {
 
         await Promise.all(
             stocks.map(async item => {
-                const investment = await StockDetails.details(item, stock_exchange).then(resp => {
-                    investments.push(resp);
-                });
+                const investment = await StockDetails.details(item, stock_exchange)
+                investments.push(investment);
             })
         );
 
