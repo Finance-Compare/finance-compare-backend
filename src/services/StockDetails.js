@@ -13,10 +13,14 @@ module.exports = {
                 .then(resp => {
                     const html = resp.data;
                     const $ = cheerio.load(html);
-                    const title = $('title').text();
-                    const value = $('fin-streamer[data-test="qsp-price"]').attr('value');
-                    const dividend_yield = $('td[data-test="DIVIDEND_AND_YIELD-value"]').text().replace(/\s*\([^\)]*\)/g, '');
-                    const values = { stock, title, value, dividend_yield }
+                    const current_value = parseFloat($('fin-streamer[data-test="qsp-price"]').attr('value'));
+                    const dividend_yield = parseFloat($('td[data-test="DIVIDEND_AND_YIELD-value"]').text().replace(/\s*\([^\)]*\)/g, ''));
+                    const prev_close_value = parseFloat($('td[data-test="PREV_CLOSE-value"]').text());
+
+                    const current_open_difference = current_value - prev_close_value
+                    const percent_change_value = ((current_open_difference * 100) / prev_close_value).toFixed(2)
+
+                    const values = { stock, current_value, dividend_yield, prev_close_value, percent_change_value }
                     resolve(values);
                 })
                 .catch(error => {

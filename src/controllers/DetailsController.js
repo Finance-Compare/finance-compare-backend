@@ -16,6 +16,6 @@ module.exports = {
             })
         );
 
-        return response.status(StatusCode.SuccessOK).json({ investments });
+        return response.status(StatusCode.SuccessOK).json( investments );
     },
 };
