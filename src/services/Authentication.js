@@ -3,8 +3,8 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const jwtKey = process.env.TOKEN_SECRET
-const jwtExpirySeconds = 1800
-const jwtRefreshExpirySeconds = 3600
+const jwtExpirySeconds = 86400
+const jwtRefreshExpirySeconds = jwtExpirySeconds * 2
 
 module.exports = {
 
