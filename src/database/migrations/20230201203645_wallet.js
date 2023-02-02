@@ -3,12 +3,12 @@
  * @returns { Promise<void> }
  */
 exports.up = function(knex) {
-	return knex.schema.createTable('login', function (table) {
+	return knex.schema.createTable('wallet', function (table) {
 		table.increments()
-		table.string('name').notNullable()
+		table.string('stock').notNullable()
 		table.string('email').notNullable()
-		table.string('password').notNullable()
-		table.string('type').notNullable().defaultTo('customer')
+		table.integer('amount').notNullable()
+		table.string('last_update').notNullable()
 	})
 }
 
@@ -17,5 +17,5 @@ exports.up = function(knex) {
  * @returns { Promise<void> }
  */
 exports.down = function(knex) {
-	return knex.schema.dropTable('login')
+	return knex.schema.dropTable('wallet')
 }
