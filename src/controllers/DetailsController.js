@@ -1,5 +1,5 @@
 const { StatusCode } = require('status-code-enum')
-const StockDetails = require('../services/StockDetails')
+const YahooStockDetails = require('../services/YahooStockDetails')
 
 module.exports = {
 
@@ -10,8 +10,9 @@ module.exports = {
 
 		await Promise.all(
 			stocks.map(async item => {
-				const investment = await StockDetails.details(item, stock_exchange)
-				investments.push(investment)
+				await YahooStockDetails.details(item, stock_exchange).then((quote)=> {
+					investments.push(quote)
+				})
 			})
 		)
 

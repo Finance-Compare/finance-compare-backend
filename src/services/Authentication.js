@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken')
 const dotenv = require('dotenv')
 const { StatusCode } = require('status-code-enum')
+const connection = require('../config/db_connection')
+const Message = require('../enum/message')
 
 dotenv.config()
 
@@ -32,17 +34,22 @@ module.exports = {
 		return { accessToken, token_expires_in: token_expires_in_str, refreshToken, refresh_token_expires_in: refresh_token_expires_in_str }
 	},
 
-	authenticateToken(req, res, next) {
+	async authenticateToken(req, res, next) {
 		const authHeader = req.headers['authorization']
 		const token = authHeader && authHeader.split(' ')[1]
-
 		if (token == null) {
 			return res.sendStatus(401)
 		}
 
 		try {
-			jwt.verify(token, process.env.TOKEN_SECRET)
-			next()
+			const payload = jwt.verify(token, process.env.TOKEN_SECRET)
+			const email = payload.email
+			const login = await connection('login').where('email', email).first()
+			if (login != undefined && login != null ){
+				next()
+			}else {
+				return res.status(StatusCode.ClientErrorUnauthorized).json({message: Message.Session.UserNotFound}).end()
+			}
 		} catch (e) {
 			if (e instanceof jwt.JsonWebTokenError) {
 				return res.status(StatusCode.ClientErrorUnauthorized).end()

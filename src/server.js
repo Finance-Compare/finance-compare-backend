@@ -1,5 +1,5 @@
 const ip = require('ip')
-const app = require('./app')
+const app = require('./config/app')
 const dotenv = require('dotenv')
 dotenv.config()
 

@@ -1,23 +1,34 @@
-const connection = require('../database/connection')
+const connection = require('../config/db_connection')
 const { StatusCode } = require('status-code-enum')
+
 const Authentication = require('../services/Authentication')
+const YahooStockDetails = require('../services/YahooStockDetails')
 
 module.exports = {
 
-	async index(request, response) {
-
+	async create(request, response) {
+		const { stock, exchange} = request.body
 		const email = await Authentication.discoverUser(request, response)
-		const investments = await connection('investments').where('email', email)
+		const stock_details = await YahooStockDetails.details(stock, exchange)
+		
+		if (stock_details == null || stock_details == undefined) {
+			return response.status(StatusCode.ClientErrorUnprocessableEntity).json({ message: 'Esse ativo não existe' })
+		}
 
-		if (investments.length > 0) {
-			return response.status(StatusCode.SuccessOK).json(investments)
-		} else {
-			return response.status(StatusCode.SuccessOK).json({ message: 'Nenhum investimento cadastrado', email: email })
+		const investment = await connection('investments')
+			.where('stock', stock)
+			.andWhere('email', email)
+			.first()
+			
+		if (investment != undefined || investment != null) {
+			return response.status(StatusCode.ClientErrorUnprocessableEntity).json({ message: 'Ativo já cadastrado' })
+		}else {
+			await connection('investments').insert({ stock ,email })
+			return response.status(StatusCode.SuccessOK).json({stock_details, message: 'Ativo adicionado com sucesso'})
 		}
 	},
 
 	async delete(request, response) {
-
 		const email = await Authentication.discoverUser(request, response)
 		const stock = request.query.stock
 
@@ -26,41 +37,25 @@ module.exports = {
 			.andWhere('stock', stock)
 			.first()
 
-		if (investment != undefined) {
+		if (investment != undefined || investment != null) {
 			await connection('investments')
 				.where('email', email)
 				.andWhere('stock', stock)
 				.del()
 			return response.status(StatusCode.SuccessOK).json({ message: 'Deletado com sucesso' })
 		} else {
-			return response.status(StatusCode.ClientErrorNotFound).json({ message: 'Nenhum investimento encontrado' })
+			return response.status(StatusCode.ClientErrorNotFound).json({ message: 'Nenhum ativo encontrado' })
 		}
 	},
 
-	async create(request, response) {
-		const { stock } = request.body
-        
+	async index(request, response) {
 		const email = await Authentication.discoverUser(request, response)
-		const login = await connection('login').where('email', email).first()
+		const investments = await connection('investments').where('email', email)
 
-		const investment = await connection('investments').where('stock', stock).first()
-
-		if (investment == undefined) {
-
-			if (login != undefined) {
-
-				await connection('investments').insert({
-					stock,
-					email
-				})
-
-				return response.status(StatusCode.SuccessOK).json({ email, message: 'Investimento cadastrado com sucesso' })
-			} else {
-				return response.status(StatusCode.ClientErrorUnauthorized).json({ message: 'Usuário não cadastrado' })
-			}
+		if (investments.length > 0) {
+			return response.status(StatusCode.SuccessOK).json(investments)
 		} else {
-			return response.status(StatusCode.ClientErrorUnauthorized).json({ message: 'Investimento já cadastrado' })
-
+			return response.status(StatusCode.SuccessOK).json({ message: 'Nenhum ativo cadastrado', email: email })
 		}
-	}
+	},
 }

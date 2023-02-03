@@ -1,7 +1,7 @@
 const express = require('express')
 const cors = require('cors')
 const { errors } = require('celebrate')
-const routes = require('./routes/routes')
+const routes = require('../routes/routes')
 const morgan = require('morgan')
 
 const app = express()

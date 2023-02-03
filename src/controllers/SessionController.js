@@ -1,7 +1,7 @@
-const connection = require('../database/connection')
+const connection = require('../config/db_connection')
 const { StatusCode } = require('status-code-enum')
-const Authentication = require('../services/Authentication')
 
+const Authentication = require('../services/Authentication')
 const Message = require('../enum/message')
 
 module.exports = {

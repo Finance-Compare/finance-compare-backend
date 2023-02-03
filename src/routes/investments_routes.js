@@ -16,7 +16,8 @@ router.post(
 	'/create',
 	celebrate({
 		[Segments.BODY]: Joi.object().keys({
-			stock: Joi.string().required()
+			stock: Joi.string().required(),
+			exchange: Joi.string().required()
 		})
 	}),
 	Authentication.authenticateToken, 
