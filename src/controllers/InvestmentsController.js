@@ -19,7 +19,7 @@ module.exports = {
 			.where('stock', stock)
 			.andWhere('email', email)
 			.first()
-			
+
 		if (investment != undefined || investment != null) {
 			return response.status(StatusCode.ClientErrorUnprocessableEntity).json({ message: 'Ativo já cadastrado' })
 		}else {
@@ -57,5 +57,21 @@ module.exports = {
 		} else {
 			return response.status(StatusCode.SuccessOK).json({ message: 'Nenhum ativo cadastrado', email: email })
 		}
+	},
+
+	async reset(request, response) {
+		const email = await Authentication.discoverUser(request, response)
+		const investments = await connection('investments').where('email', email)
+
+		await Promise.all(
+			investments.map(async item => {
+				await connection('investments')
+					.where('email', email)
+					.andWhere('stock', item.stock)
+					.del()
+			})
+		)
+
+		return response.status(StatusCode.SuccessOK).json({message: 'Simulação reiniciada com sucesso' })
 	},
 }

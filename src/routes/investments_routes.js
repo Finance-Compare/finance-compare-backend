@@ -35,6 +35,13 @@ router.delete(
 	InvestmentsController.delete
 )
 
+
+router.post(
+	'/reset',
+	Authentication.authenticateToken,
+	InvestmentsController.reset
+)
+
 router.post(
 	'/details',
 	celebrate({
