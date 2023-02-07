@@ -43,7 +43,7 @@ module.exports = {
 				.where('email', email)
 				.andWhere('stock', stock)
 				.del()
-			return response.status(StatusCode.SuccessOK).json({ message: 'Deletado com sucesso' })
+			return response.status(StatusCode.SuccessOK).json({ message: Message.General.DeletedSuccessfully })
 		} else {
 			return response.status(StatusCode.ClientErrorNotFound).json({ message: 'Nenhum ativo encontrado' })
 		}

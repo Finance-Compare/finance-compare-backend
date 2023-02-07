@@ -7,14 +7,16 @@ const Message = Object.freeze({
 		ExpiredSession: 'Sessão expirada',
 		UserCreatedSuccessfully: 'Usuário criado com sucesso',
 		UserIsAlreadyRegistered: 'Usuário já cadastrado',
-		UserDeletedSuccessfully: 'Deletado com sucesso',
 		NoUserFoundWithEmail: 'Nenhum usuário encontrado com o e-mail: ',
 		UserWithoutPermission: 'Usuário sem permissão'
 	},
 	Investiment: {
 		StockNotFound: 'Esse ativo não existe',
-		ActiveAlreadyRegistered: 'Ativo adicionado com sucesso',
+		ActiveAlreadyRegistered: 'Ativo já cadastrado',
 		StockAddedSuccessfully: 'Ativo adicionado com sucesso'
+	},
+	General: {
+		DeletedSuccessfully: 'Deletado com sucesso'
 	}
 })
 

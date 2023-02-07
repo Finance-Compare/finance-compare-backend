@@ -56,6 +56,13 @@ module.exports = {
 		}
 	},
 
+	findTokenEmail(req) {
+		const authorization=  req.headers['authorization']
+		const token = authorization && authorization.split(' ')[1]
+		const payload = jwt.verify(token, process.env.TOKEN_SECRET)
+		return payload.email
+	},
+
 	async discoverUser(req) {
 		const authHeader = req.headers['authorization']
 		const token = authHeader && authHeader.split(' ')[1]
