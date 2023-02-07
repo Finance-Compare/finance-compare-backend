@@ -7,6 +7,17 @@ const Message = require('../enum/message')
 module.exports = {
 
 	async index(request, response) {
+
+		const email = await Authentication.discoverUser(request, response)
+		
+		const login = await connection('login')
+			.where('email', email)
+			.first()
+
+		if (login.type == 'customer')  {
+			return response.status(StatusCode.ClientErrorUnauthorized).json({ message: Message.Session.UserWithoutPermission })
+		}
+
 		const logins = await connection('login').select('*')
 
 		if (logins != null) {
@@ -19,23 +30,34 @@ module.exports = {
 	async auth(request, response) {
 		const { email, password } = request.body
 
-		const login = await connection('login').where('email', email).first()
+		const login = await connection('login')
+			.where('email', email)
+			.first()
 
 		if (!login) {
 			return response.status(StatusCode.ClientErrorNotFound).json({ message: Message.Session.UserNotFound })
 		}
-		if (password == password) {
+		if (password == login.password) {
 			const token = Authentication.generateAccessToken(email)
-			return response.json({ user: login, token })
+			const user =  { id: login.id, name: login.name, email: login.email, permission: login.type }
+			return response.json({user, token })
 		} else {
 			return response.status(StatusCode.ClientErrorUnauthorized).json({ message: Message.Session.InvalidPassword })
 		}
 	},
 
 	async create(request, response) {
-		const { name, email, password, type } = request.body
+		const { name, email, password } = request.body
 
-		const login = await connection('login').where('email', email).select('email').first()
+		var type = request.body.type
+
+		if (request.body.type == null) {
+			type = 'customer'
+		}
+
+		const login = await connection('login')
+			.where('email', email)
+			.first()
 
 		if (!login) {
 			await connection('login').insert({
@@ -44,22 +66,24 @@ module.exports = {
 				password,
 				type
 			})
-			return response.json({ name: name, email: email, type: type, message: 'Usuário criado com sucesso' })
+			return response.json({ name, email, permission: type, message: Message.Session.UserCreatedSuccessfully })
 		} else {
-			return response.status(StatusCode.ClientErrorUnauthorized).json({ error: 'Usuário já cadastrado' })
+			return response.status(StatusCode.ClientErrorUnauthorized).json({ message: Message.Session.UserIsAlreadyRegistered })
 		}
 	},
 
 	async delete(request, response) {
         
 		const email = await Authentication.discoverUser(request, response)
-		const login = await connection('login').where('email', email).first()
+		const login = await connection('login')
+			.where('email', email)
+			.first()
 
 		if (login != undefined) {
 			await connection('login').where('email', email).del()
-			return response.status(StatusCode.SuccessOK).json({ message: 'Deletado com sucesso' })
+			return response.status(StatusCode.SuccessOK).json({ message: Message.Session.UserDeletedSuccessfully })
 		} else {
-			return response.status(StatusCode.ClientErrorNotFound).json({ message: 'Nenhum usuário encontrado com o e-mail: ' + email })
+			return response.status(StatusCode.ClientErrorNotFound).json({ message: Message.Session.NoUserFoundWithEmail + email })
 		}
 	},
 

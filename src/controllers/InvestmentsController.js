@@ -3,28 +3,29 @@ const { StatusCode } = require('status-code-enum')
 
 const Authentication = require('../services/Authentication')
 const YahooStockDetails = require('../services/YahooStockDetails')
+const Message = require('../enum/message')
 
 module.exports = {
 
 	async create(request, response) {
 		const { stock, exchange} = request.body
 		const email = await Authentication.discoverUser(request, response)
-		const stock_details = await YahooStockDetails.details(stock, exchange)
-		
-		if (stock_details == null || stock_details == undefined) {
-			return response.status(StatusCode.ClientErrorUnprocessableEntity).json({ message: 'Esse ativo não existe' })
-		}
 
-		const investment = await connection('investments')
-			.where('stock', stock)
-			.andWhere('email', email)
-			.first()
-
-		if (investment != undefined || investment != null) {
-			return response.status(StatusCode.ClientErrorUnprocessableEntity).json({ message: 'Ativo já cadastrado' })
-		}else {
-			await connection('investments').insert({ stock ,email })
-			return response.status(StatusCode.SuccessOK).json({stock_details, message: 'Ativo adicionado com sucesso'})
+		try {
+			const stock_details = await YahooStockDetails.details(stock, exchange)
+			const investment = await connection('investments')
+				.where('stock', stock)
+				.andWhere('email', email)
+				.first()
+	
+			if (investment != undefined || investment != null) {
+				return response.status(StatusCode.ClientErrorUnprocessableEntity).json({ message: Message.Investiment.ActiveAlreadyRegistered })
+			}else {
+				await connection('investments').insert({ stock ,email })
+				return response.status(StatusCode.SuccessOK).json({ stock_details, message: Message.Investiment.StockAddedSuccessfully })
+			}
+		} catch {
+			return response.status(StatusCode.ClientErrorUnprocessableEntity).json({ message: Message.Investiment.StockNotFound })
 		}
 	},
 

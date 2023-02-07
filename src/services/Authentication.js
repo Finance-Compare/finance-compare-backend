@@ -37,6 +37,7 @@ module.exports = {
 	async authenticateToken(req, res, next) {
 		const authHeader = req.headers['authorization']
 		const token = authHeader && authHeader.split(' ')[1]
+
 		if (token == null) {
 			return res.sendStatus(401)
 		}
@@ -48,13 +49,10 @@ module.exports = {
 			if (login != undefined && login != null ){
 				next()
 			}else {
-				return res.status(StatusCode.ClientErrorUnauthorized).json({message: Message.Session.UserNotFound}).end()
+				return res.status(StatusCode.ClientErrorUnauthorized).json({ message: Message.Session.UserNotFound }).end()
 			}
-		} catch (e) {
-			if (e instanceof jwt.JsonWebTokenError) {
-				return res.status(StatusCode.ClientErrorUnauthorized).end()
-			}
-			return res.status(StatusCode.ClientErrorBadRequest).end()
+		} catch (error) {
+			return res.status(StatusCode.ClientErrorUnauthorized).json({ message: Message.Session.ExpiredSession }).end()
 		}
 	},
 

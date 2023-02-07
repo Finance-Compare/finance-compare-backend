@@ -22,8 +22,7 @@ router.post(
 		[Segments.BODY]: Joi.object().keys({
 			name: Joi.string().required(),
 			email: Joi.string().required(),
-			password: Joi.string().required(),
-			type: Joi.string().required()
+			password: Joi.string().required()
 		})
 	}),
 	SessionController.create
@@ -37,6 +36,7 @@ router.delete(
 
 router.get(
 	'/all',
+	Authentication.authenticateToken,
 	SessionController.index
 )
 
